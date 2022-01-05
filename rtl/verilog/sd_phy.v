@@ -194,19 +194,23 @@ synch_3       k(mode_spi, mode_spi_s, sd_clk,);
 synch_3       l(mode_crc_disable, mode_crc_disable_s, sd_clk,);
 
 
-always @(posedge sd_clk or negedge reset_n or posedge spi_cs) begin
-   // Count positive edges for SPI byte framing, async reset on chipselect high
-   if (~reset_n || spi_cs) begin
+reg last_cs;
+always @(posedge sd_clk) begin
+   last_cs <= spi_cs;
+   if (~reset_n) begin
       spi_cnt <= 0;
    end else begin
-      spi_cnt <= spi_cnt + 1'b1;
+      // Count positive edges for SPI byte framing, async reset on chipselect high
+      if ((spi_cs && ~last_cs) === 1'b1) begin
+         spi_cnt <= spi_cnt + 1'b1;
+      end
    end
 end
 
 assign spi_sel = ~spi_cs & ~sd_dat_oe[3];
 
 
-always @(posedge sd_clk or negedge reset_n) begin
+always @(posedge sd_clk) begin
 
    sd_cmd_last <= sd_cmd;
    sd_dat_last <= sd_dat[0];
@@ -402,7 +406,7 @@ always @(posedge sd_clk or negedge reset_n) begin
 end
 
 
-always @(negedge sd_clk or negedge reset_n) begin
+always @(negedge sd_clk) begin
 
    // free running counter
    odc <= odc + 1'b1;
