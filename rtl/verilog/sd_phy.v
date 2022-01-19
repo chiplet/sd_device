@@ -159,6 +159,15 @@ reg  [15:0] dodc;
 reg  [6:0]  distate;
 reg  [6:0]  dostate;
 
+initial begin
+   ostate <= ST_RESET;
+   dostate <= ST_RESET;
+   istate <= ST_RESET;
+   distate <= ST_RESET;
+   ostate <= ST_RESET;
+   dostate <= ST_RESET;
+end
+
 reg  [7:0]  spi_di_token;
 
 reg  [31:0] dout_buf;
@@ -194,16 +203,17 @@ synch_3       k(mode_spi, mode_spi_s, sd_clk,);
 synch_3       l(mode_crc_disable, mode_crc_disable_s, sd_clk,);
 
 
+// FPGA register initial values
+initial begin
+   spi_cnt <= 0;
+end
+
 reg last_cs;
 always @(posedge sd_clk) begin
    last_cs <= spi_cs;
-   if (~reset_n) begin
-      spi_cnt <= 0;
-   end else begin
-      // Count positive edges for SPI byte framing, async reset on chipselect high
-      if ((spi_cs && ~last_cs) === 1'b1) begin
-         spi_cnt <= spi_cnt + 1'b1;
-      end
+   // Count positive edges for SPI byte framing, async reset on chipselect high
+   if ((spi_cs && ~last_cs) === 1'b1) begin
+      spi_cnt <= spi_cnt + 1'b1;
    end
 end
 
@@ -398,10 +408,10 @@ always @(posedge sd_clk) begin
    default: distate <= ST_RESET;
    endcase
 
-   if(~reset_n) begin
-      istate <= ST_RESET;
-      distate <= ST_RESET;
-   end
+   // if(~reset_n) begin
+   //    istate <= ST_RESET;
+   //    distate <= ST_RESET;
+   // end
 
 end
 
@@ -699,10 +709,12 @@ always @(negedge sd_clk) begin
    // for snooping real cards
    // sd_dat_oe <= 4'b0;
    // sd_cmd_oe <= 1'b0;
-   if(~reset_n) begin
-      ostate <= ST_RESET;
-      dostate <= ST_RESET;
-   end
+
+   // resets commented out for ICE40 synthesis
+   // if(~reset_n) begin
+   //    ostate <= ST_RESET;
+   //    dostate <= ST_RESET;
+   // end
    
 end
 
