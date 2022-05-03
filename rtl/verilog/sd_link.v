@@ -84,7 +84,7 @@ module sd_link (
 `include "sd_params.vh"
 `include "sd_const.vh"
 
-parameter  [21:0] CSD_C_SIZE             = 'd249;
+parameter  [21:0] CSD_C_SIZE             = 'd7; // (7+1)*512*1024 bytes = 4 Mebibytes
 localparam [31:0] SD_TOTAL_BLOCKS        = ({10'd0,CSD_C_SIZE}+1) * 1024;
 
 reg  [47:0]  cmd_in_latch;
